@@ -75,11 +75,12 @@ class HiActivity:
     TYPE_OTHER = 'Other'
     TYPE_CROSSFIT = 'CrossFit',
     TYPE_CROSS_COUNTRY_RUN = 'Cross_Country_Run'
+    TYPE_ALPINE_SKI = 'Apline_Ski'
     TYPE_UNKNOWN = '?'
 
     _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE,
                            TYPE_MOUNTAIN_HIKE, TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER,
-                           TYPE_CROSSFIT, TYPE_CROSS_COUNTRY_RUN)
+                           TYPE_CROSSFIT, TYPE_CROSS_COUNTRY_RUN, TYPE_ALPINE_SKI)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN, timestamp_ref: datetime = None, start_timestamp_ref: datetime = None):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
@@ -1206,7 +1207,8 @@ class HiJson:
                          (111, HiActivity.TYPE_CROSS_TRAINER),
                          (117, HiActivity.TYPE_OTHER),
                          (145, HiActivity.TYPE_CROSSFIT),
-                         (118, HiActivity.TYPE_CROSS_COUNTRY_RUN)]
+                         (118, HiActivity.TYPE_CROSS_COUNTRY_RUN),
+                         (217, HiActivity.TYPE_ALPINE_SKI)]
 
     _UNSUPPORTED_JSON_SPORT_TYPES = []
 
@@ -1489,7 +1491,8 @@ class TcxActivity:
                         (HiActivity.TYPE_OTHER, _SPORT_OTHER),
                         (HiActivity.TYPE_CROSSFIT, _SPORT_OTHER),
                         (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER),
-                        (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'Running')]
+                        (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'Running'),
+                        (HiActivity.TYPE_ALPINE_SKI, _SPORT_OTHER)]
 
     # TODO Customize XSD schema in the _validate_xml() function to validate Strava sport types.
     # TODO Upload activities directly into Strava using Strava API
@@ -1506,7 +1509,8 @@ class TcxActivity:
                            (HiActivity.TYPE_OTHER, _SPORT_OTHER),
                            (HiActivity.TYPE_CROSSFIT, 'crossfit'),  # Not recognized by Strava TCX upload, change activity type after upload manually to Crossfit.
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER),
-                           (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'running')]
+                           (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'running'),
+                           (HiActivity.TYPE_ALPINE_SKI, 'AlpineSki')]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
                  filename_prefix: str = None, filename_suffix: str = None, insert_altitude: bool = False):
@@ -1584,6 +1588,7 @@ class TcxActivity:
                                                         HiActivity.TYPE_OTHER,
                                                         HiActivity.TYPE_CROSSFIT,
                                                         HiActivity.TYPE_CROSS_COUNTRY_RUN,
+                                                        HiActivity.TYPE_ALPINE_SKI,
                                                         HiActivity.TYPE_UNKNOWN]:
                 self._generate_walk_run_cycle_xml_data(el_activity)
             elif self.hi_activity.get_activity_type() in [HiActivity.TYPE_POOL_SWIM,
@@ -1999,7 +2004,8 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                                      HiActivity.TYPE_RUN,
                                      HiActivity.TYPE_CYCLE,
                                      HiActivity.TYPE_POOL_SWIM,
-                                     HiActivity.TYPE_OPEN_WATER_SWIM])
+                                     HiActivity.TYPE_OPEN_WATER_SWIM,
+                                     HiActivity.TYPE_ALPINE_SKI])
 
     tar_group = parser.add_argument_group('TAR options')
     tar_group.add_argument('-t', '--tar', help='The filename of an (unencrypted) tarball with HiTrack files to \
